@@ -26,8 +26,10 @@ const char* MorseDigitTable[MORSE_DIGIT_SIZE] = {
 const ALPHABET MorseAlphabet = {MORSE_ALPHA_SIZE, MorseAlphaTable,
                                 MORSE_DIGIT_SIZE, MorseDigitTable};
 
-char get_morse_symbol(const char* morse_letter, const unsigned int index);
+char get_letter_from_string(const char* string, const unsigned int index);
 
-const char* get_morse_letter(const ALPHABET alpha, char letter);
+const char* get_letter_from_alphabet(const ALPHABET alpha, const char letter);
 
 void print_alphabet(const ALPHABET alpha);
+
+const char* get_letter_from_morse_alphabet(char letter);
