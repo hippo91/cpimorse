@@ -8,6 +8,16 @@ struct ALPHABET_T {
 };
 typedef struct ALPHABET_T ALPHABET;
 
+struct DURATION_T {
+  const unsigned int dot;
+  const unsigned int dash;
+  const unsigned int space;
+  const unsigned int inter_letter;
+  const unsigned int inter_word;
+};
+typedef struct DURATION_T DURATION;
+
+
 #define MORSE_ALPHA_SIZE 26
 const char* MorseAlphaTable[MORSE_ALPHA_SIZE] = {
 // A       B      C       D     E     F       G      H       I
@@ -33,3 +43,12 @@ const char* get_letter_from_alphabet(const ALPHABET alpha, const char letter);
 void print_alphabet(const ALPHABET alpha);
 
 const char* get_letter_from_morse_alphabet(char letter);
+
+#define DOT_DURATION 1
+#define DASH_DURATION DOT_DURATION * 2
+#define SPACE_DURATION DOT_DURATION
+#define INTER_LETTER_DURATION DOT_DURATION * 3
+#define INTER_WORD_DURATION DOT_DURATION * 7
+const DURATION MorseDuration = {DOT_DURATION, DASH_DURATION,
+                                SPACE_DURATION, INTER_LETTER_DURATION,
+                                INTER_WORD_DURATION};
