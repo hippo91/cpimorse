@@ -129,9 +129,9 @@ int main(int nb_args, char* argv[]) {
       return 3;
     }
     if (next != '\n') {
-      if (isalnum(next))
+      if (isalnum(next)) {
         sleep(MorseDuration.inter_letter);
-      else
+      } else {
         sleep(MorseDuration.inter_word);
         // Move forward till the next word
         while (next != '\n' && !isalnum(next)) {
@@ -141,6 +141,7 @@ int main(int nb_args, char* argv[]) {
           if (i < strlen(message) - 1)
             next = message[i+1];
         }
+      }
     }
   }
 }
