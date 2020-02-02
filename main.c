@@ -2,7 +2,73 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <gpiod.h>
 #include "morse_alphabet/morse_alphabet.h"
+
+#define IN  0
+#define OUT 1
+
+#define LOW  0
+#define HIGH 1
+
+#define POUT 21 /* P1-40 */
+#define GPIOCHIP0 "/dev/gpiochip0"
+#define EMITTER "CPiMorse"
+#define ACTIVITY 0
+
+/*------------------------------------------------------------------*/
+/**
+ * @brief Sleep during duration specified
+ * 
+ * @param duration : duration
+ */
+/*------------------------------------------------------------------*/
+void wait(void* duration)
+{
+  unsigned int * delay_p = (unsigned int *) duration;
+  sleep(*delay_p);
+}
+
+/*------------------------------------------------------------------*/
+/**
+ * @brief Get the pin status
+ * 
+ * @return int : 0 or 1 in case of success. -1 otherwise.
+ */
+/*------------------------------------------------------------------*/
+int get_pin_status()
+{
+  return gpiod_ctxless_get_value(GPIOCHIP0, POUT, ACTIVITY, EMITTER);
+}
+
+/*------------------------------------------------------------------*/
+/**
+ * @brief Emit dash
+ * 
+ * @return int : 0 or 1 in case of success. -1 otherwise.
+ */
+/*------------------------------------------------------------------*/
+int emit_dash()
+{
+  int res = gpiod_ctxless_set_value(GPIOCHIP0, POUT, HIGH, ACTIVITY, EMITTER,
+                                    wait, (void*) &MorseDuration.dash);
+  return res;
+}
+
+/*------------------------------------------------------------------*/
+/**
+ * @brief Emit dot
+ * 
+ * @return int : 0 or 1 in case of success. -1 otherwise.
+ */
+/*------------------------------------------------------------------*/
+int emit_dot()
+{
+  int res = gpiod_ctxless_set_value(GPIOCHIP0, POUT, HIGH, ACTIVITY, EMITTER,
+                                    wait, (void *) &MorseDuration.dot);
+  return res;
+}
+
 
 /*------------------------------------------------------------------*/
 /**
@@ -15,21 +81,25 @@
 size_t emit_morse_letter(const char* morse_letter) {
   const size_t length = strlen(morse_letter);
   size_t emitted = 0;
-  for (size_t j=0; j < length; ++j) {
-    char current_symbol = morse_letter[j];
+  for (; emitted < length; ++emitted) {
+    char current_symbol = morse_letter[emitted];
     if (current_symbol == 'S') {
-      printf(" Emitting .");
-    }
-    else if (current_symbol == 'L') {
-      printf(" Emitting -");
+      if (emit_dot() == -1) {
+        fprintf(stderr, "Unable to emit dot for index %i of %s\n", (int)emitted, morse_letter);
+        break;
+      };
+    } else if (current_symbol == 'L') {
+      if (emit_dash() == -1) {
+        fprintf(stderr, "Unable to emit dash for index %i of %s\n", (int)emitted, morse_letter);
+        break;
+      };
     } else {
       fprintf(stderr, "Unknown morse symbol %c\n", current_symbol);
-      return emitted;
+      break;
     }
-    ++emitted;
-    if (j != length - 1)
+    if (emitted != length - 1)
       sleep(MorseDuration.space);
-    if (j == length - 1) printf("\n");
+    if (emitted == length - 1) printf("\n");
   }
   return emitted;
 }
@@ -63,6 +133,7 @@ int main(int nb_args, char* argv[]) {
         sleep(MorseDuration.inter_letter);
       else
         sleep(MorseDuration.inter_word);
+        // Move forward till the next word
         while (next != '\n' && !isalnum(next)) {
           ++i;
           current = message[i];
