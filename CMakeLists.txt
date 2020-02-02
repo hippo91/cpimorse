@@ -17,4 +17,6 @@ add_subdirectory( ${CMAKE_CURRENT_LIST_DIR}/morse_alphabet )
 add_executable( cpimorse main.c )
 target_compile_features( cpimorse PRIVATE c_std_11 )
 target_compile_options( cpimorse PRIVATE -Werror -Wall -Wextra )
-target_link_libraries( cpimorse PRIVATE morse_alphabet )
+target_link_libraries( cpimorse PRIVATE 
+  gpiod
+  morse_alphabet )
